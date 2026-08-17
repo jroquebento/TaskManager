@@ -1,0 +1,42 @@
+# Visual Studio
+.vs/
+
+# Build
+bin/
+obj/
+Debug/
+Release/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.rsuser
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+*.trx
+
+# Code coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Environment / secrets
+.env
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Publish
+publish/
+*.publish.xml
+*.pubxml
+*.publishproj
