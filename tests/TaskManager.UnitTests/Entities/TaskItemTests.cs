@@ -10,7 +10,8 @@ public class TaskItemTests
     public void Start_ShouldChangeStatusToInProgress() 
     {
         // Arrange
-        var task = new TaskItem();
+        var task = new TaskItem("Tarefa de teste",null,null);
+
 
         // Act
         task.Start();
@@ -22,7 +23,7 @@ public class TaskItemTests
     
     public void Complete_ShouldChangeStatusToCompleted()
     {
-        var task = new TaskItem();
+        var task = new TaskItem("Tarefa de teste", null, null);
         task.Start();
 
         task.Complete();
@@ -32,7 +33,7 @@ public class TaskItemTests
     [Fact]
     public void Complete_ShouldThrowExceptionWhenTaskIsPending()
     {
-        var task = new TaskItem();
+        var task = new TaskItem("Tarefa de teste", null, null);
      
         Assert.Throws<DomainException>(() => task.Complete());
     }
@@ -40,7 +41,7 @@ public class TaskItemTests
     [Fact]
     public void Start_ShouldThrowExceptionWhenTaskIsInProgress() 
     {
-        var task = new TaskItem();
+        var task = new TaskItem("Tarefa de teste", null, null);
         task.Start();
 
         Assert.Throws<DomainException>(() => task.Start());
