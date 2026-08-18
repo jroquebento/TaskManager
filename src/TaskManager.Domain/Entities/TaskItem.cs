@@ -9,13 +9,18 @@ public class TaskItem
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
 
-    public TaskItemStatus Status { get; set; }
+    public TaskItemStatus Status { get; private set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? DueDate { get; set; }
 
-    public TaskItem()
+    public TaskItem(string title, string? description, DateTime? dueDate)
     {
+        Id = Guid.NewGuid();
+        Title = title;
+        Description = description;
+        DueDate = dueDate;
         Status = TaskItemStatus.Pending;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public void Start() 
