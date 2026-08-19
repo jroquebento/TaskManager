@@ -46,4 +46,22 @@ public class TaskItemTests
 
         Assert.Throws<DomainException>(() => task.Start());
     }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenTitleIsNull() 
+    {
+        Assert.Throws<DomainException>(() => new TaskItem(null!, null, null));
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenTitleIsEmpty()
+    {
+        Assert.Throws<DomainException>(() => new TaskItem("", null, null));
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenTitleIsWhiteSpace() 
+    {
+        Assert.Throws<DomainException>(() => new TaskItem("   ", null, null));
+    }
 }
