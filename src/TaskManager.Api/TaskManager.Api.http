@@ -9,7 +9,7 @@ POST {{TaskManager.Api_HostAddress}}/api/tasks
 Content-Type: application/json
 
 {
-  "title": "Testar fluxo completo",
-  "description": "Debug do TaskManager",
+  "title": "Testar validação da TaskItem",
+  "description": "Confirmar que tarefas válidas continuam funcionando",
   "dueDate": "2026-08-25T18:00:00"
 }

@@ -15,6 +15,11 @@ public class TaskItem
 
     public TaskItem(string title, string? description, DateTime? dueDate)
     {
+        if (string.IsNullOrWhiteSpace(title)) 
+        {
+            throw new DomainException("O título da tarefa é obrigatório.");
+        }
+
         Id = Guid.NewGuid();
         Title = title;
         Description = description;
