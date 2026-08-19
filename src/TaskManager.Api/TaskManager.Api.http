@@ -4,3 +4,12 @@ GET {{TaskManager.Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST {{TaskManager.Api_HostAddress}}/api/tasks
+Content-Type: application/json
+
+{
+  "title": "Testar fluxo completo",
+  "description": "Debug do TaskManager",
+  "dueDate": "2026-08-25T18:00:00"
+}
