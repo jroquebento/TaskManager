@@ -5,4 +5,5 @@ namespace TaskManager.Application.Interfaces;
 public interface ITaskRepository
 {
     Task AddAsync(TaskItem taskItem);
+    Task<List<TaskItem>> GetAllAsync();
 }

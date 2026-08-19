@@ -1,4 +1,5 @@
-﻿using TaskManager.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManager.Application.Interfaces;
 using TaskManager.Domain.Entities;
 using TaskManager.Infrastructure.Data;
 
@@ -16,5 +17,10 @@ public class TaskRepository : ITaskRepository
     {
         _context.TaskItems.Add(taskItem);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<TaskItem>> GetAllAsync()
+    {
+        return await _context.TaskItems.ToListAsync();
     }
 }

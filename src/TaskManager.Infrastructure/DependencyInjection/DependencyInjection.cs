@@ -20,6 +20,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITaskRepository, TaskRepository>();
+        
 
         return services;
     }
