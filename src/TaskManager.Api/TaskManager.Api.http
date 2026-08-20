@@ -18,3 +18,8 @@ Content-Type: application/json
 
 GET {{TaskManager.Api_HostAddress}}/api/tasks
 Accept: application/json
+
+###
+
+GET {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000
+Accept: application/json
