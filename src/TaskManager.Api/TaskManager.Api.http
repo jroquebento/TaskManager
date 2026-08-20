@@ -23,3 +23,36 @@ Accept: application/json
 
 GET {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000
 Accept: application/json
+
+###
+
+PUT {{TaskManager.Api_HostAddress}}/api/tasks/8d3e3c84-420f-4f1a-95cd-ff9702022205
+Content-Type: application/json
+{
+  "title": "Tarefa atualizada pelo PUT",
+  "description": "Testando o fluxo de atualização",
+  "dueDate": "2026-09-01T18:00:00"
+}
+
+###
+
+PUT {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "Tarefa inexistente",
+  "description": "Este registro não existe",
+  "dueDate": "2026-09-01T18:00:00"
+}
+
+###
+
+PUT {{TaskManager.Api_HostAddress}}/api/tasks/8d3e3c84-420f-4f1a-95cd-ff9702022205
+Content-Type: application/json
+
+{
+  "title": "",
+  "description": "Tentando inserir título inválido",
+  "dueDate": "2026-09-01T18:00:00"
+}
+

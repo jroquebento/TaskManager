@@ -64,4 +64,25 @@ public class TaskItemTests
     {
         Assert.Throws<DomainException>(() => new TaskItem("   ", null, null));
     }
+
+    [Fact]
+    public void Update_ShouldChangeTaskData()
+    {
+        TaskItem taskItem = new("Tarefa original",null,null);
+
+        taskItem.Update("Tarefa atualizada", "Nova descrição", new DateTime(2026,05,01));
+
+        Assert.Equal("Tarefa atualizada", taskItem.Title);
+        Assert.Equal("Nova descrição", taskItem.Description);
+        Assert.Equal(new DateTime(2026, 05, 01), taskItem.DueDate);
+    }
+
+    [Fact]
+    public void Update_ShouldThrowExceptionWhenTitleIsInvalid() 
+    {
+        TaskItem taskItem = new("Tarefa original", null, null);
+
+        Assert.Throws<DomainException>(() => 
+        taskItem.Update("", "Nova descrição", new DateTime(2026, 05, 01)));
+    }
 }

@@ -3,6 +3,7 @@ using TaskManager.Application.DTOs;
 using TaskManager.Application.UseCases.CreateTask;
 using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.ListTasks;
+using TaskManager.Application.UseCases.UpdateTask;
 
 namespace TaskManager.Api.Controllers;
 
@@ -13,12 +14,14 @@ public class TasksController : ControllerBase
     private readonly CreateTaskUseCase _createTaskUseCase;
     private readonly ListTasksUseCase _listTasksUseCase;
     private readonly GetTaskByIdUseCase _getTaskByIdUseCase;
+    private readonly UpdateTaskUseCase _updateTaskUseCase;
 
-    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase)
+    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase, UpdateTaskUseCase updateTaskUseCase)
     {
         _createTaskUseCase = createTaskUseCase;
         _listTasksUseCase = listTasksUseCase;
         _getTaskByIdUseCase = getTaskByIdUseCase;
+        _updateTaskUseCase = updateTaskUseCase;
     }
 
     [HttpPost]
@@ -48,4 +51,18 @@ public class TasksController : ControllerBase
 
         return Ok(taskItem);
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskRequest request) 
+    {
+        var taskItem = await _updateTaskUseCase.ExecuteAsync(id, request);
+        
+        if (taskItem == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(taskItem);
+    }
 }
+

@@ -28,4 +28,10 @@ public class TaskRepository : ITaskRepository
     {
         return await _context.TaskItems.FirstOrDefaultAsync(task => task.Id == id);
     }
+
+    public async Task UpdateAsync(TaskItem taskItem)
+    {
+        _context.TaskItems.Update(taskItem);
+        await _context.SaveChangesAsync();
+    }
 }

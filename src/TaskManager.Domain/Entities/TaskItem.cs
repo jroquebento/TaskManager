@@ -5,13 +5,13 @@ namespace TaskManager.Domain.Entities;
 
 public class TaskItem
 {
-    public Guid Id { get; set; } 
-    public string Title { get; set; } = string.Empty;
-    public string? Description { get; set; }
+    public Guid Id { get; private set; } 
+    public string Title { get; private set; } = string.Empty;
+    public string? Description { get; private set; }
 
     public TaskItemStatus Status { get; private set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? DueDate { get; set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? DueDate { get; private set; }
 
     public TaskItem(string title, string? description, DateTime? dueDate)
     {
@@ -44,5 +44,17 @@ public class TaskItem
             throw new DomainException("A tarefa não pode ser finalizada neste estado.");
         }
         Status = TaskItemStatus.Completed;
+    }
+
+    public void Update(string title, string? description, DateTime? dueDate) 
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new DomainException("O título da tarefa é obrigatório.");
+        }
+
+        Title = title;
+        Description = description;
+        DueDate = dueDate;
     }
 } 
