@@ -18,7 +18,6 @@ public class TaskRepository : ITaskRepository
         _context.TaskItems.Add(taskItem);
         await _context.SaveChangesAsync();
     }
-
     public async Task<List<TaskItem>> GetAllAsync()
     {
         return await _context.TaskItems.ToListAsync();
@@ -32,6 +31,11 @@ public class TaskRepository : ITaskRepository
     public async Task UpdateAsync(TaskItem taskItem)
     {
         _context.TaskItems.Update(taskItem);
+        await _context.SaveChangesAsync();
+    }
+    public async Task DeleteAsync(TaskItem taskItem)
+    {
+        _context.TaskItems.Remove(taskItem);
         await _context.SaveChangesAsync();
     }
 }

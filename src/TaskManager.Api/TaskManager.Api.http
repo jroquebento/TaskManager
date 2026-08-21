@@ -56,3 +56,16 @@ Content-Type: application/json
   "dueDate": "2026-09-01T18:00:00"
 }
 
+###
+
+DELETE {{TaskManager.Api_HostAddress}}/api/tasks/be208efd-96fe-4753-b8b7-f8683d2aa366
+Accept: application/json
+
+###
+GET {{TaskManager.Api_HostAddress}}/api/tasks/be208efd-96fe-4753-b8b7-f8683d2aa366
+Accept: application/json
+
+###
+
+DELETE {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000
+Accept: application/json

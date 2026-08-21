@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.UseCases.CreateTask;
+using TaskManager.Application.UseCases.DeleteTask;
 using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.ListTasks;
 using TaskManager.Application.UseCases.UpdateTask;
@@ -15,13 +16,15 @@ public class TasksController : ControllerBase
     private readonly ListTasksUseCase _listTasksUseCase;
     private readonly GetTaskByIdUseCase _getTaskByIdUseCase;
     private readonly UpdateTaskUseCase _updateTaskUseCase;
+    private readonly DeleteTaskUseCase _deleteTaskUseCase;
 
-    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase, UpdateTaskUseCase updateTaskUseCase)
+    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase, UpdateTaskUseCase updateTaskUseCase, DeleteTaskUseCase deleteTaskUseCase)
     {
         _createTaskUseCase = createTaskUseCase;
         _listTasksUseCase = listTasksUseCase;
         _getTaskByIdUseCase = getTaskByIdUseCase;
         _updateTaskUseCase = updateTaskUseCase;
+        _deleteTaskUseCase = deleteTaskUseCase;
     }
 
     [HttpPost]
@@ -63,6 +66,18 @@ public class TasksController : ControllerBase
         }
 
         return Ok(taskItem);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id) 
+    {
+        var deleted = await _deleteTaskUseCase.ExecuteAsync(id);
+        if (!deleted) 
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }
 
