@@ -4,6 +4,8 @@ using TaskManager.Application.UseCases.ListTasks;
 using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.UpdateTask;
 using TaskManager.Application.UseCases.DeleteTask;
+using TaskManager.Application.UseCases.StartTask;
+using TaskManager.Application.UseCases.CompleteTask;
 
 
 namespace TaskManager.Application.DependencyInjection;
@@ -17,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<GetTaskByIdUseCase>();
         services.AddScoped<UpdateTaskUseCase>();
         services.AddScoped<DeleteTaskUseCase>();
+        services.AddScoped<StartTaskUseCase>();
+        services.AddScoped<CompleteTaskUseCase>();
         return services;
     }
 }

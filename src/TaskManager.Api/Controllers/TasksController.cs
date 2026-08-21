@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.DTOs;
+using TaskManager.Application.UseCases.CompleteTask;
 using TaskManager.Application.UseCases.CreateTask;
 using TaskManager.Application.UseCases.DeleteTask;
 using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.ListTasks;
+using TaskManager.Application.UseCases.StartTask;
 using TaskManager.Application.UseCases.UpdateTask;
 
 namespace TaskManager.Api.Controllers;
@@ -17,14 +19,18 @@ public class TasksController : ControllerBase
     private readonly GetTaskByIdUseCase _getTaskByIdUseCase;
     private readonly UpdateTaskUseCase _updateTaskUseCase;
     private readonly DeleteTaskUseCase _deleteTaskUseCase;
+    private readonly StartTaskUseCase _startTaskUseCase;
+    private readonly CompleteTaskUseCase _completeTaskUseCase;
 
-    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase, UpdateTaskUseCase updateTaskUseCase, DeleteTaskUseCase deleteTaskUseCase)
+    public TasksController(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, GetTaskByIdUseCase getTaskByIdUseCase, UpdateTaskUseCase updateTaskUseCase, DeleteTaskUseCase deleteTaskUseCase, StartTaskUseCase startTaskUseCase, CompleteTaskUseCase completeTaskUseCase )
     {
         _createTaskUseCase = createTaskUseCase;
         _listTasksUseCase = listTasksUseCase;
         _getTaskByIdUseCase = getTaskByIdUseCase;
         _updateTaskUseCase = updateTaskUseCase;
         _deleteTaskUseCase = deleteTaskUseCase;
+        _startTaskUseCase = startTaskUseCase;
+        _completeTaskUseCase = completeTaskUseCase;
     }
 
     [HttpPost]
@@ -78,6 +84,32 @@ public class TasksController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/start")]
+    public async Task<IActionResult> Start(Guid id) 
+    {
+        var started = await _startTaskUseCase.ExecuteAsync(id);
+
+        if (!started) 
+        {
+            return NotFound();
+        }
+
+        return Ok();
+    }
+
+    [HttpPost("{id:guid}/complete")]
+    public async Task<IActionResult> Complete(Guid id) 
+    {
+        var completed = await _completeTaskUseCase.ExecuteAsync(id);
+
+        if (!completed) 
+        {
+            return NotFound();
+        }
+
+        return Ok();
     }
 }
 

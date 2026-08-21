@@ -67,5 +67,27 @@ Accept: application/json
 
 ###
 
-DELETE {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000
+POST {{TaskManager.Api_HostAddress}}/api/tasks
+Content-Type: application/json
+{
+  "title": "Testar start da TaskItem",
+  "description": "Confirmar que tarefa muda para InProgress",
+  "dueDate": "2026-08-25T18:00:00"
+}
+
+###
+
+POST {{TaskManager.Api_HostAddress}}/api/tasks/8c3fd483-80ec-4f8e-8961-7e9edf2578f0/start
+Accept: application/json
+
+###
+POST {{TaskManager.Api_HostAddress}}/api/tasks/8c3fd483-80ec-4f8e-8961-7e9edf2578f0/complete
+Accept: application/json
+
+###
+POST {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000/start
+Accept: application/json
+
+###
+POST {{TaskManager.Api_HostAddress}}/api/tasks/00000000-0000-0000-0000-000000000000/complete
 Accept: application/json
