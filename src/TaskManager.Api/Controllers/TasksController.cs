@@ -7,6 +7,7 @@ using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.ListTasks;
 using TaskManager.Application.UseCases.StartTask;
 using TaskManager.Application.UseCases.UpdateTask;
+using TaskManager.Domain.Entities;
 
 namespace TaskManager.Api.Controllers;
 
@@ -34,6 +35,8 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateTaskRequest request)
     {
         var taskItem = await _createTaskUseCase.Execute(request);
@@ -41,7 +44,9 @@ public class TasksController : ControllerBase
         return Created(string.Empty, taskItem);
     }
 
+
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<TaskItem>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
         var tasks = await _listTasksUseCase.ExecuteAsync();
@@ -50,6 +55,8 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var taskItem = await _getTaskByIdUseCase.ExecuteAsync(id);
@@ -62,6 +69,9 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskRequest request) 
     {
         var taskItem = await _updateTaskUseCase.ExecuteAsync(id, request);
@@ -75,6 +85,8 @@ public class TasksController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id) 
     {
         var deleted = await _deleteTaskUseCase.ExecuteAsync(id);
@@ -87,6 +99,9 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{id:guid}/start")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Start(Guid id) 
     {
         var started = await _startTaskUseCase.ExecuteAsync(id);
@@ -100,6 +115,9 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{id:guid}/complete")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Complete(Guid id) 
     {
         var completed = await _completeTaskUseCase.ExecuteAsync(id);
