@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.DTOs;
+using TaskManager.Application.Mappers;
 using TaskManager.Application.UseCases.CompleteTask;
 using TaskManager.Application.UseCases.CreateTask;
 using TaskManager.Application.UseCases.DeleteTask;
@@ -35,27 +36,31 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateTaskRequest request)
     {
         var taskItem = await _createTaskUseCase.Execute(request);
 
-        return Created(string.Empty, taskItem);
+        var response = TaskMapper.ToResponse(taskItem);
+
+        return Created(string.Empty, response);
     }
 
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<TaskItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<TaskResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
         var tasks = await _listTasksUseCase.ExecuteAsync();
 
-        return Ok(tasks);
+        var response = tasks.Select(TaskMapper.ToResponse);
+
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -65,11 +70,12 @@ public class TasksController : ControllerBase
             return NotFound();
         }
 
-        return Ok(taskItem);
+        var response = TaskMapper.ToResponse(taskItem);
+        return Ok(response);
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(TaskItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskRequest request) 
@@ -81,7 +87,9 @@ public class TasksController : ControllerBase
             return NotFound();
         }
 
-        return Ok(taskItem);
+        var response = TaskMapper.ToResponse(taskItem);
+
+        return Ok(response);
     }
 
     [HttpDelete("{id:guid}")]
