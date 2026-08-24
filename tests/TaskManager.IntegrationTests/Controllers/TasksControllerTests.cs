@@ -1,0 +1,224 @@
+﻿using System.Net;
+using System.Net.Http.Json;
+using TaskManager.Application.DTOs;
+using TaskManager.Domain.Enums;
+using TaskManager.IntegrationTests.Fixtures;
+
+namespace TaskManager.IntegrationTests.Controllers;
+
+public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
+{
+    private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client;
+
+    public TasksControllerTests(CustomWebApplicationFactory factory)
+    {
+        _factory = factory;
+        _client = factory.CreateClient();
+    }
+
+    [Fact]
+    public async Task GetAll_ShouldReturnOk()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var response = await _client.GetAsync("/api/Tasks");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_ShouldCreateTask()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var request = new
+        {
+            title = "Tarefa de integração",
+            description = "Teste de integração",
+            dueDate = DateTime.UtcNow.AddDays(1)
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Tasks", request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var createdTask = await response.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(createdTask);
+        Assert.Equal(request.title, createdTask.Title);
+        Assert.Equal(request.description, createdTask.Description);
+
+        var getResponse = await _client.GetAsync($"/api/Tasks/{createdTask.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var retrievedTask = await getResponse.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(retrievedTask);
+        Assert.Equal(createdTask.Id, retrievedTask.Id);
+    }
+
+    [Fact]
+    public async Task GetById_ShouldReturnNotFound_WhenTaskDoesNotExist()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var id = Guid.NewGuid();
+
+        var response = await _client.GetAsync($"/api/Tasks/{id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_ShouldUpdateTask()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var updateRequest = new
+        {
+            title = "Tarefa atualizada",
+            description = "Descrição atualizada",
+            dueDate = DateTime.UtcNow.AddDays(5)
+        };
+
+        var updateResponse = await _client.PutAsJsonAsync(
+            $"/api/Tasks/{createdTask.Id}",
+            updateRequest);
+
+        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+
+        var updatedTask = await updateResponse.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(updatedTask);
+        Assert.Equal(createdTask.Id, updatedTask.Id);
+        Assert.Equal(updateRequest.title, updatedTask.Title);
+        Assert.Equal(updateRequest.description, updatedTask.Description);
+    }
+
+    [Fact]
+    public async Task Delete_ShouldDeleteTask()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var deleteResponse = await _client.DeleteAsync($"/api/Tasks/{createdTask.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/Tasks/{createdTask.Id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Start_ShouldStartTask()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var response = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/start",
+            null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var getResponse = await _client.GetAsync(
+            $"/api/Tasks/{createdTask.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var updatedTask = await getResponse.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(updatedTask);
+        Assert.Equal(TaskItemStatus.InProgress, updatedTask.Status);
+    }
+
+    [Fact]
+    public async Task Complete_ShouldCompleteTask()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var startResponse = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/start",
+            null);
+
+        Assert.Equal(HttpStatusCode.OK, startResponse.StatusCode);
+
+        var completeResponse = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/complete",
+            null);
+
+        Assert.Equal(HttpStatusCode.OK, completeResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync(
+            $"/api/Tasks/{createdTask.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var completedTask = await getResponse.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(completedTask);
+        Assert.Equal(TaskItemStatus.Completed, completedTask.Status);
+    }
+
+    [Fact]
+    public async Task Start_ShouldReturnBadRequest_WhenTaskIsAlreadyInProgress()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var firstStartResponse = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/start",
+            null);
+
+        Assert.Equal(HttpStatusCode.OK, firstStartResponse.StatusCode);
+
+        var secondStartResponse = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/start",
+            null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, secondStartResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Complete_ShouldReturnBadRequest_WhenTaskIsPending()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var createdTask = await CreateTaskAsync();
+
+        var response = await _client.PostAsync(
+            $"/api/Tasks/{createdTask.Id}/complete",
+            null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    private async Task<TaskResponse> CreateTaskAsync()
+    {
+        var request = new
+        {
+            title = "Tarefa de integração",
+            description = "Teste de integração",
+            dueDate = DateTime.UtcNow.AddDays(1)
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Tasks", request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var createdTask = await response.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(createdTask);
+
+        return createdTask;
+    }
+}
