@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskManager.Application.Interfaces;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Repositories;
+using TaskManager.Infrastructure.Security;
 
 namespace TaskManager.Infrastructure.DependencyInjection;
 
@@ -20,7 +21,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITaskRepository, TaskRepository>();
-        
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
 
         return services;
     }

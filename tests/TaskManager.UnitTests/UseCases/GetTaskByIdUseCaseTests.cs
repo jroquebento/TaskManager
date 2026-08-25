@@ -8,10 +8,11 @@ namespace TaskManager.UnitTests.UseCases;
 
 public class GetTaskByIdUseCaseTests
 {
+    private readonly Guid _userId = Guid.NewGuid();
     [Fact]
     public async Task ExecuteAsync_ShouldReturnTaskItemWhenTaskExists() 
     {
-        TaskItem taskItem = new TaskItem("Tarefa 1", null, null);
+        TaskItem taskItem = new TaskItem(_userId, "Tarefa 1", null, null);
 
         var repositoryMock = new Mock<ITaskRepository>();
         repositoryMock

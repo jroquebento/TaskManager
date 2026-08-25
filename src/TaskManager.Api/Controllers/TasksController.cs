@@ -8,7 +8,6 @@ using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.ListTasks;
 using TaskManager.Application.UseCases.StartTask;
 using TaskManager.Application.UseCases.UpdateTask;
-using TaskManager.Domain.Entities;
 
 namespace TaskManager.Api.Controllers;
 

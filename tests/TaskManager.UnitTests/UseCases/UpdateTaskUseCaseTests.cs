@@ -9,10 +9,11 @@ namespace TaskManager.UnitTests.UseCases;
 
 public class UpdateTaskUseCaseTests
 {
+    private readonly Guid _userId = Guid.NewGuid();
     [Fact]
     public async Task ExecuteAsync_ShouldUpdateTaskWhenTaskExists() 
     {
-        var taskItem = new TaskItem("Tarefa original", null, null);
+        var taskItem = new TaskItem(_userId, "Tarefa original", null, null);
         var request = new UpdateTaskRequest
         {
             Title = "Tarefa atualizada",

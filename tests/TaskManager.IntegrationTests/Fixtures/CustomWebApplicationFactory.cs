@@ -43,6 +43,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         var dbContext = scope.ServiceProvider.GetRequiredService<TaskManagerDbContext>();
 
         dbContext.TaskItems.RemoveRange(dbContext.TaskItems);
+        dbContext.Users.RemoveRange(dbContext.Users);
 
         await dbContext.SaveChangesAsync();
     }

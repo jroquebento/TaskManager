@@ -13,14 +13,24 @@ public class TaskItem
     public DateTime CreatedAt { get; private set; }
     public DateTime? DueDate { get; private set; }
 
-    public TaskItem(string title, string? description, DateTime? dueDate)
+    public Guid UserId { get; private set; }
+    public User User { get; private set; } = null!;
+
+
+    public TaskItem(Guid userId,string title, string? description, DateTime? dueDate)
     {
+        if (userId == Guid.Empty)
+        {
+            throw new DomainException("O usuário da tarefa é obrigatório.");
+        }
+
         if (string.IsNullOrWhiteSpace(title)) 
         {
             throw new DomainException("O título da tarefa é obrigatório.");
         }
 
         Id = Guid.NewGuid();
+        UserId = userId;
         Title = title;
         Description = description;
         DueDate = dueDate;

@@ -6,6 +6,7 @@ using TaskManager.Application.UseCases.UpdateTask;
 using TaskManager.Application.UseCases.DeleteTask;
 using TaskManager.Application.UseCases.StartTask;
 using TaskManager.Application.UseCases.CompleteTask;
+using TaskManager.Application.UseCases.CreateUser;
 
 
 namespace TaskManager.Application.DependencyInjection;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<DeleteTaskUseCase>();
         services.AddScoped<StartTaskUseCase>();
         services.AddScoped<CompleteTaskUseCase>();
+        services.AddScoped<CreateUserUseCase>();
         return services;
     }
 }

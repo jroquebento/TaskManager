@@ -7,10 +7,12 @@ namespace TaskManager.UnitTests.UseCases;
 
 public class DeleteTaskUseCaseTests
 {
+    private readonly Guid _userId = Guid.NewGuid();
+
     [Fact]
     public async Task ExecuteAsync_ShouldDeleteTaskWhenTaskExists() 
     {
-        TaskItem taskItem = new("Tarefa 1", null, null);
+        TaskItem taskItem = new(_userId, "Tarefa 1", null, null);
 
         var repositoryMock = new Mock<ITaskRepository>();
 

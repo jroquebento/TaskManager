@@ -9,10 +9,12 @@ namespace TaskManager.UnitTests.UseCases;
 
 public class CompleteTaskUseCaseTests
 {
+    private readonly Guid _userId = Guid.NewGuid();
+
     [Fact]
     public async Task ExecuteAsync_ShouldCompleteTaskWhenTaskExists()
     {
-        TaskItem taskItem = new("Tarefa 1", null, null);
+        TaskItem taskItem = new(_userId, "Tarefa 1", null, null);
         taskItem.Start();
 
         var repositoryMock = new Mock<ITaskRepository>();
@@ -58,7 +60,7 @@ public class CompleteTaskUseCaseTests
     [Fact]
     public async Task ExecuteAsync_ShouldThrowExceptionWhenTaskIsAlreadyCompleted()
     {
-        TaskItem taskItem = new("Tarefa 1", null, null);
+        TaskItem taskItem = new(_userId, "Tarefa 1", null, null);
         taskItem.Start();
         taskItem.Complete();
 
