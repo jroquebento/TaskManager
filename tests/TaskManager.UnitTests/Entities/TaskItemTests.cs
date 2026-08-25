@@ -6,11 +6,13 @@ namespace TaskManager.UnitTests.Entities;
 
 public class TaskItemTests
 {
+    private readonly Guid _userId = Guid.NewGuid();
+
     [Fact]
     public void Start_ShouldChangeStatusToInProgress() 
     {
         // Arrange
-        var task = new TaskItem("Tarefa de teste",null,null);
+        var task = new TaskItem(_userId, "Tarefa de teste",null,null);
 
 
         // Act
@@ -23,7 +25,7 @@ public class TaskItemTests
     
     public void Complete_ShouldChangeStatusToCompleted()
     {
-        var task = new TaskItem("Tarefa de teste", null, null);
+        var task = new TaskItem(_userId,"Tarefa de teste", null, null);
         task.Start();
 
         task.Complete();
@@ -33,7 +35,7 @@ public class TaskItemTests
     [Fact]
     public void Complete_ShouldThrowExceptionWhenTaskIsPending()
     {
-        var task = new TaskItem("Tarefa de teste", null, null);
+        var task = new TaskItem(_userId, "Tarefa de teste", null, null);
      
         Assert.Throws<DomainException>(() => task.Complete());
     }
@@ -41,7 +43,7 @@ public class TaskItemTests
     [Fact]
     public void Start_ShouldThrowExceptionWhenTaskIsInProgress() 
     {
-        var task = new TaskItem("Tarefa de teste", null, null);
+        var task = new TaskItem(_userId, "Tarefa de teste", null, null);
         task.Start();
 
         Assert.Throws<DomainException>(() => task.Start());
@@ -50,25 +52,25 @@ public class TaskItemTests
     [Fact]
     public void Constructor_ShouldThrowExceptionWhenTitleIsNull() 
     {
-        Assert.Throws<DomainException>(() => new TaskItem(null!, null, null));
+        Assert.Throws<DomainException>(() => new TaskItem(_userId, null!, null, null));
     }
 
     [Fact]
     public void Constructor_ShouldThrowExceptionWhenTitleIsEmpty()
     {
-        Assert.Throws<DomainException>(() => new TaskItem("", null, null));
+        Assert.Throws<DomainException>(() => new TaskItem(_userId, "", null, null));
     }
 
     [Fact]
     public void Constructor_ShouldThrowExceptionWhenTitleIsWhiteSpace() 
     {
-        Assert.Throws<DomainException>(() => new TaskItem("   ", null, null));
+        Assert.Throws<DomainException>(() => new TaskItem(_userId, "   ", null, null));
     }
 
     [Fact]
     public void Update_ShouldChangeTaskData()
     {
-        TaskItem taskItem = new("Tarefa original",null,null);
+        TaskItem taskItem = new(_userId, "Tarefa original",null,null);
 
         taskItem.Update("Tarefa atualizada", "Nova descrição", new DateTime(2026,05,01));
 
@@ -80,7 +82,7 @@ public class TaskItemTests
     [Fact]
     public void Update_ShouldThrowExceptionWhenTitleIsInvalid() 
     {
-        TaskItem taskItem = new("Tarefa original", null, null);
+        TaskItem taskItem = new(_userId, "Tarefa original", null, null);
 
         Assert.Throws<DomainException>(() => 
         taskItem.Update("", "Nova descrição", new DateTime(2026, 05, 01)));

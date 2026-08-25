@@ -32,8 +32,11 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     {
         await _factory.ResetDatabaseAsync();
 
+        var user = await CreateUserAsync();
+
         var request = new
         {
+            userId = user.Id,
             title = "Tarefa de integração",
             description = "Teste de integração",
             dueDate = DateTime.UtcNow.AddDays(1)
@@ -204,8 +207,11 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     }
     private async Task<TaskResponse> CreateTaskAsync()
     {
+        var user = await CreateUserAsync();
+
         var request = new
         {
+            userId = user.Id,
             title = "Tarefa de integração",
             description = "Teste de integração",
             dueDate = DateTime.UtcNow.AddDays(1)
@@ -220,5 +226,25 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
         Assert.NotNull(createdTask);
 
         return createdTask;
+    }
+
+    private async Task<UserResponse> CreateUserAsync()
+    {
+        var request = new
+        {
+            name = "Usuário de teste",
+            email = $"{Guid.NewGuid()}@email.com",
+            password = "123456"
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Users", request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var createdUser = await response.Content.ReadFromJsonAsync<UserResponse>();
+
+        Assert.NotNull(createdUser);
+
+        return createdUser;
     }
 }

@@ -14,7 +14,7 @@ public class CreateTaskUseCase
 
     public async Task<TaskItem> Execute(CreateTaskRequest request)
     {
-        TaskItem taskItem = new TaskItem(request.Title, request.Description, request.DueDate);
+        TaskItem taskItem = new TaskItem(request.UserId ,request.Title, request.Description, request.DueDate);
         await _taskRepository.AddAsync(taskItem);
         return taskItem;
     }
