@@ -1,5 +1,4 @@
-﻿using Castle.Core.Logging;
-using Moq;
+﻿using Moq;
 using TaskManager.Application.Interfaces;
 using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Domain.Entities;
@@ -9,17 +8,27 @@ namespace TaskManager.UnitTests.UseCases;
 public class GetTaskByIdUseCaseTests
 {
     private readonly Guid _userId = Guid.NewGuid();
+
     [Fact]
-    public async Task ExecuteAsync_ShouldReturnTaskItemWhenTaskExists() 
+    public async Task ExecuteAsync_ShouldReturnTaskItemWhenTaskExists()
     {
-        TaskItem taskItem = new TaskItem(_userId, "Tarefa 1", null, null);
+        TaskItem taskItem = new (_userId, "Tarefa 1", null, null);
 
         var repositoryMock = new Mock<ITaskRepository>();
+
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(taskItem.Id))
+            .Setup(repository => repository.GetByIdAsync(taskItem.Id, _userId))
             .ReturnsAsync(taskItem);
 
-        var useCase = new GetTaskByIdUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new GetTaskByIdUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(taskItem.Id);
 
@@ -30,13 +39,22 @@ public class GetTaskByIdUseCaseTests
     public async Task ExecuteAsync_ShouldReturnNullWhenTaskDoesNotExist()
     {
         var id = Guid.NewGuid();
-        
+
         var repositoryMock = new Mock<ITaskRepository>();
+
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(id))
+            .Setup(repository => repository.GetByIdAsync(id, _userId))
             .ReturnsAsync((TaskItem?)null);
 
-        var useCase = new GetTaskByIdUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new GetTaskByIdUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(id);
 

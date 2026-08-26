@@ -1,7 +1,6 @@
 ﻿using Moq;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Interfaces;
-using TaskManager.Application.UseCases.GetTaskById;
 using TaskManager.Application.UseCases.UpdateTask;
 using TaskManager.Domain.Entities;
 
@@ -10,10 +9,12 @@ namespace TaskManager.UnitTests.UseCases;
 public class UpdateTaskUseCaseTests
 {
     private readonly Guid _userId = Guid.NewGuid();
+
     [Fact]
-    public async Task ExecuteAsync_ShouldUpdateTaskWhenTaskExists() 
+    public async Task ExecuteAsync_ShouldUpdateTaskWhenTaskExists()
     {
         var taskItem = new TaskItem(_userId, "Tarefa original", null, null);
+
         var request = new UpdateTaskRequest
         {
             Title = "Tarefa atualizada",
@@ -24,10 +25,18 @@ public class UpdateTaskUseCaseTests
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(taskItem.Id))
+            .Setup(repository => repository.GetByIdAsync(taskItem.Id, _userId))
             .ReturnsAsync(taskItem);
 
-        var useCase = new UpdateTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new UpdateTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(taskItem.Id, request);
 
@@ -36,8 +45,8 @@ public class UpdateTaskUseCaseTests
         Assert.Equal(new DateTime(2026, 05, 01), result.DueDate);
 
         repositoryMock.Verify(
-                repository => repository.UpdateAsync(taskItem),
-                Times.Once);
+            repository => repository.UpdateAsync(taskItem),
+            Times.Once);
     }
 
     [Fact]
@@ -53,18 +62,27 @@ public class UpdateTaskUseCaseTests
         };
 
         var repositoryMock = new Mock<ITaskRepository>();
+
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(id))
+            .Setup(repository => repository.GetByIdAsync(id, _userId))
             .ReturnsAsync((TaskItem?)null);
 
-        var useCase = new UpdateTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new UpdateTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(id, request);
 
         Assert.Null(result);
 
         repositoryMock.Verify(
-                repository => repository.UpdateAsync(It.IsAny<TaskItem>()),
-                Times.Never);
+            repository => repository.UpdateAsync(It.IsAny<TaskItem>()),
+            Times.Never);
     }
 }
