@@ -19,17 +19,33 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
-    public async Task GetAll_ShouldReturnOk()
+    public async Task GetAll_ShouldReturnOnlyTasksFromAuthenticatedUser()
     {
         await _factory.ResetDatabaseAsync();
 
-        var user = await CreateUserAsync();
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
 
-        await AuthenticateAsync(user, "123456");
+        await AuthenticateAsync(user1, "123456");
+
+        var task1 = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var task2 = await CreateTaskAsyncForUser(user2);
+
+        await AuthenticateAsync(user1, "123456");
 
         var response = await _client.GetAsync("/api/Tasks");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var tasks = await response.Content.ReadFromJsonAsync<List<TaskResponse>>();
+
+        Assert.NotNull(tasks);
+
+        Assert.Contains(tasks, task => task.Id == task1.Id);
+        Assert.DoesNotContain(tasks, task => task.Id == task2.Id);
     }
 
     [Fact]
@@ -43,7 +59,6 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
 
         var request = new
         {
-            userId = user.Id,
             title = "Tarefa de integração",
             description = "Teste de integração",
             dueDate = DateTime.UtcNow.AddDays(1)
@@ -86,6 +101,26 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
+    public async Task GetById_ShouldReturnNotFound_WhenTaskBelongsToAnotherUser()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
+
+        await AuthenticateAsync(user1, "123456");
+
+        var task = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var response = await _client.GetAsync(
+            $"/api/Tasks/{task.Id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Update_ShouldUpdateTask()
     {
         await _factory.ResetDatabaseAsync();
@@ -114,6 +149,34 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Update_ShouldReturnNotFound_WhenTaskBelongsToAnotherUser()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
+
+        await AuthenticateAsync(user1, "123456");
+
+        var task = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var updateRequest = new
+        {
+            title = "Tentativa de alteração",
+            description = "Usuário incorreto",
+            dueDate = DateTime.UtcNow.AddDays(10)
+        };
+
+        var response = await _client.PutAsJsonAsync(
+            $"/api/Tasks/{task.Id}",
+            updateRequest);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Delete_ShouldDeleteTask()
     {
         await _factory.ResetDatabaseAsync();
@@ -127,6 +190,26 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
         var getResponse = await _client.GetAsync($"/api/Tasks/{createdTask.Id}");
 
         Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_ShouldReturnNotFound_WhenTaskBelongsToAnotherUser()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
+
+        await AuthenticateAsync(user1, "123456");
+
+        var task = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var response = await _client.DeleteAsync(
+            $"/api/Tasks/{task.Id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -151,6 +234,27 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
 
         Assert.NotNull(updatedTask);
         Assert.Equal(TaskItemStatus.InProgress, updatedTask.Status);
+    }
+
+    [Fact]
+    public async Task Start_ShouldReturnNotFound_WhenTaskBelongsToAnotherUser()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
+
+        await AuthenticateAsync(user1, "123456");
+
+        var task = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var response = await _client.PostAsync(
+            $"/api/Tasks/{task.Id}/start",
+            null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -181,6 +285,27 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
 
         Assert.NotNull(completedTask);
         Assert.Equal(TaskItemStatus.Completed, completedTask.Status);
+    }
+
+    [Fact]
+    public async Task Complete_ShouldReturnNotFound_WhenTaskBelongsToAnotherUser()
+    {
+        await _factory.ResetDatabaseAsync();
+
+        var user1 = await CreateUserAsync();
+        var user2 = await CreateUserAsync();
+
+        await AuthenticateAsync(user1, "123456");
+
+        var task = await CreateTaskAsyncForUser(user1);
+
+        await AuthenticateAsync(user2, "123456");
+
+        var response = await _client.PostAsync(
+            $"/api/Tasks/{task.Id}/complete",
+            null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -240,6 +365,29 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
 
         return createdTask;
     }
+
+    private async Task<TaskResponse> CreateTaskAsyncForUser(UserResponse user)
+    {
+        await AuthenticateAsync(user, "123456");
+
+        var request = new
+        {
+            title = "Tarefa de integração",
+            description = "Teste de integração",
+            dueDate = DateTime.UtcNow.AddDays(1)
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Tasks", request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var createdTask = await response.Content.ReadFromJsonAsync<TaskResponse>();
+
+        Assert.NotNull(createdTask);
+
+        return createdTask;
+    }
+
 
     private async Task<UserResponse> CreateUserAsync()
     {

@@ -18,10 +18,18 @@ public class StartTaskUseCaseTests
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(taskItem.Id))
+            .Setup(repository => repository.GetByIdAsync(taskItem.Id, _userId))
             .ReturnsAsync(taskItem);
 
-        var useCase = new StartTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(user => user.UserId)
+            .Returns(_userId);
+
+        var useCase = new StartTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(taskItem.Id);
 
@@ -41,10 +49,18 @@ public class StartTaskUseCaseTests
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(id))
+            .Setup(repository => repository.GetByIdAsync(id, _userId))
             .ReturnsAsync((TaskItem?)null);
 
-        var useCase = new StartTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(user => user.UserId)
+            .Returns(_userId);
+
+        var useCase = new StartTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(id);
 
@@ -64,13 +80,21 @@ public class StartTaskUseCaseTests
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(taskItem.Id))
+            .Setup(repository => repository.GetByIdAsync(taskItem.Id, _userId))
             .ReturnsAsync(taskItem);
 
-        var useCase = new StartTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(user => user.UserId)
+            .Returns(_userId);
+
+        var useCase = new StartTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         await Assert.ThrowsAsync<DomainException>(() => useCase.ExecuteAsync(taskItem.Id));
-     
+
         repositoryMock.Verify(
             repository => repository.UpdateAsync(It.IsAny<TaskItem>()),
             Times.Never);

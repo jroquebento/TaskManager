@@ -1,13 +1,18 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using TaskManager.Api.Filters;
 using TaskManager.Api.OpenApi;
+using TaskManager.Api.Services;
 using TaskManager.Application.DependencyInjection;
+using TaskManager.Application.Interfaces;
 using TaskManager.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.Services
     .AddAuthentication("Bearer")

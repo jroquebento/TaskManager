@@ -10,17 +10,25 @@ public class DeleteTaskUseCaseTests
     private readonly Guid _userId = Guid.NewGuid();
 
     [Fact]
-    public async Task ExecuteAsync_ShouldDeleteTaskWhenTaskExists() 
+    public async Task ExecuteAsync_ShouldDeleteTaskWhenTaskExists()
     {
         TaskItem taskItem = new(_userId, "Tarefa 1", null, null);
 
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(taskItem.Id))
+            .Setup(repository => repository.GetByIdAsync(taskItem.Id, _userId))
             .ReturnsAsync(taskItem);
 
-        var useCase = new DeleteTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new DeleteTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(taskItem.Id);
 
@@ -30,6 +38,7 @@ public class DeleteTaskUseCaseTests
             repository => repository.DeleteAsync(taskItem),
             Times.Once);
     }
+
     [Fact]
     public async Task ExecuteAsync_ShouldReturnFalseWhenTaskDoesNotExist()
     {
@@ -38,10 +47,18 @@ public class DeleteTaskUseCaseTests
         var repositoryMock = new Mock<ITaskRepository>();
 
         repositoryMock
-            .Setup(repository => repository.GetByIdAsync(id))
+            .Setup(repository => repository.GetByIdAsync(id, _userId))
             .ReturnsAsync((TaskItem?)null);
 
-        var useCase = new DeleteTaskUseCase(repositoryMock.Object);
+        var currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock
+            .Setup(currentUser => currentUser.UserId)
+            .Returns(_userId);
+
+        var useCase = new DeleteTaskUseCase(
+            repositoryMock.Object,
+            currentUserMock.Object);
 
         var result = await useCase.ExecuteAsync(id);
 
