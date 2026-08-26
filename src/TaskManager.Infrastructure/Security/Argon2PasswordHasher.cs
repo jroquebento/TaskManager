@@ -26,6 +26,21 @@ public class Argon2PasswordHasher : IPasswordHasher
         return Convert.ToBase64String(combinedBytes);
     }
 
+    public bool VerifyPassword(string password, string passwordHash)
+    {
+        var combinedBytes = Convert.FromBase64String(passwordHash);
+
+        var salt = new byte[SaltSize];
+        var storedHash = new byte[HashSize];
+
+        Array.Copy(combinedBytes, salt, SaltSize);
+        Array.Copy(combinedBytes, SaltSize, storedHash, 0, HashSize);
+
+        var newHash = HashPassword(password, salt);
+
+        return CryptographicOperations.FixedTimeEquals(storedHash, newHash);
+    }
+
     private byte[] HashPassword(string password, byte[] salt)
     {
         var passwordBytes = Encoding.UTF8.GetBytes(password);

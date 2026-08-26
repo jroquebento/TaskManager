@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 using TaskManager.Application.DTOs;
 using TaskManager.Domain.Enums;
 using TaskManager.IntegrationTests.Fixtures;
@@ -22,6 +23,10 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     {
         await _factory.ResetDatabaseAsync();
 
+        var user = await CreateUserAsync();
+
+        await AuthenticateAsync(user, "123456");
+
         var response = await _client.GetAsync("/api/Tasks");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -33,6 +38,8 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
         await _factory.ResetDatabaseAsync();
 
         var user = await CreateUserAsync();
+
+        await AuthenticateAsync(user, "123456");
 
         var request = new
         {
@@ -66,6 +73,10 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetById_ShouldReturnNotFound_WhenTaskDoesNotExist()
     {
         await _factory.ResetDatabaseAsync();
+
+        var user = await CreateUserAsync();
+
+        await AuthenticateAsync(user, "123456");
 
         var id = Guid.NewGuid();
 
@@ -209,6 +220,8 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
     {
         var user = await CreateUserAsync();
 
+        await AuthenticateAsync(user, "123456");
+
         var request = new
         {
             userId = user.Id,
@@ -246,5 +259,30 @@ public class TasksControllerTests : IClassFixture<CustomWebApplicationFactory>
         Assert.NotNull(createdUser);
 
         return createdUser;
+    }
+
+    private async Task AuthenticateAsync(UserResponse user, string password)
+    {
+        var loginRequest = new
+        {
+            email = user.Email,
+            password
+        };
+
+        var response = await _client.PostAsJsonAsync(
+            "/api/Auth/login",
+            loginRequest);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var loginResponse =
+            await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+        Assert.NotNull(loginResponse);
+
+        _client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                loginResponse.Token);
     }
 }

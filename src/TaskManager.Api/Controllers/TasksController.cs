@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Mappers;
 using TaskManager.Application.UseCases.CompleteTask;
@@ -11,6 +12,7 @@ using TaskManager.Application.UseCases.UpdateTask;
 
 namespace TaskManager.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
@@ -46,7 +48,7 @@ public class TasksController : ControllerBase
         return Created(string.Empty, response);
     }
 
-
+   
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<TaskResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
