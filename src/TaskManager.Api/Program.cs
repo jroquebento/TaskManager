@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Filters;
 using TaskManager.Api.OpenApi;
 using TaskManager.Api.Services;
 using TaskManager.Application.DependencyInjection;
 using TaskManager.Application.Interfaces;
+using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,6 +95,17 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
+
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<TaskManagerDbContext>();
+
+        await dbContext.Database.MigrateAsync();
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
