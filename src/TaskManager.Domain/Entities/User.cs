@@ -1,4 +1,6 @@
-﻿using TaskManager.Domain.Exceptions;
+﻿using System.Net.Mail;
+using System.Text.RegularExpressions;
+using TaskManager.Domain.Exceptions;
 
 namespace TaskManager.Domain.Entities;
 
@@ -28,6 +30,8 @@ public class User
             throw new DomainException("O e-mail do usuário é obrigatório.");
         }
 
+        ValidateEmail(email);
+
         if (string.IsNullOrWhiteSpace(passwordHash)) 
         {
             throw new DomainException("A senha do usuário é obrigatória");
@@ -37,5 +41,12 @@ public class User
         Name = name; 
         Email = email;
         PasswordHash = passwordHash;
+    }
+    private static void ValidateEmail(string email)
+    {
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$"))
+        {
+            throw new DomainException("O e-mail do usuário é inválido.");
+        }
     }
 }

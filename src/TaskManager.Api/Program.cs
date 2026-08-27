@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Filters;
 using TaskManager.Api.OpenApi;
@@ -35,27 +34,6 @@ builder.Services
             IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                 System.Text.Encoding.UTF8.GetBytes(
                     configuration["Jwt:SecretKey"]!))
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                Console.WriteLine($"JWT HEADER: {context.Request.Headers.Authorization}");
-                return Task.CompletedTask;
-            },
-
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"JWT ERROR: {context.Exception.Message}");
-                return Task.CompletedTask;
-            },
-
-            OnChallenge = context =>
-            {
-                Console.WriteLine($"JWT CHALLENGE: {context.Error} - {context.ErrorDescription}");
-                return Task.CompletedTask;
-            }
         };
     });
 

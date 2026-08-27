@@ -5,7 +5,7 @@ namespace TaskManager.Domain.Entities;
 
 public class TaskItem
 {
-    public Guid Id { get; private set; } 
+    public Guid Id { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
 
@@ -17,14 +17,14 @@ public class TaskItem
     public User User { get; private set; } = null!;
 
 
-    public TaskItem(Guid userId,string title, string? description, DateTime? dueDate)
+    public TaskItem(Guid userId, string title, string? description, DateTime? dueDate)
     {
         if (userId == Guid.Empty)
         {
             throw new DomainException("O usuário da tarefa é obrigatório.");
         }
 
-        if (string.IsNullOrWhiteSpace(title)) 
+        if (string.IsNullOrWhiteSpace(title))
         {
             throw new DomainException("O título da tarefa é obrigatório.");
         }
@@ -33,12 +33,15 @@ public class TaskItem
         UserId = userId;
         Title = title;
         Description = description;
-        DueDate = dueDate;
         Status = TaskItemStatus.Pending;
         CreatedAt = DateTime.UtcNow;
+
+        ValidateDueDate(dueDate);
+
+        DueDate = dueDate;
     }
 
-    public void Start() 
+    public void Start()
     {
         if (Status != TaskItemStatus.Pending)
         {
@@ -49,22 +52,32 @@ public class TaskItem
 
     public void Complete()
     {
-        if (Status != TaskItemStatus.InProgress) 
+        if (Status != TaskItemStatus.InProgress)
         {
             throw new DomainException("A tarefa não pode ser finalizada neste estado.");
         }
         Status = TaskItemStatus.Completed;
     }
 
-    public void Update(string title, string? description, DateTime? dueDate) 
+    public void Update(string title, string? description, DateTime? dueDate)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
             throw new DomainException("O título da tarefa é obrigatório.");
         }
 
+        ValidateDueDate(dueDate);
+
         Title = title;
         Description = description;
         DueDate = dueDate;
     }
-} 
+
+    private void ValidateDueDate(DateTime? dueDate)
+    {
+        if (dueDate.HasValue && dueDate.Value < CreatedAt)
+        {
+            throw new DomainException("A data de vencimento não pode ser anterior à data de criação.");
+        }
+    }
+}
