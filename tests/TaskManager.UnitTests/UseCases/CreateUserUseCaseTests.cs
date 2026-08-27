@@ -75,4 +75,32 @@ public class CreateUserUseCaseTests
             repository => repository.AddAsync(It.IsAny<User>()), 
             Times.Never);
     }
+
+    [Fact]
+    public async Task Execute_ShouldThrowException_WhenPasswordIsEmpty()
+    {
+        var request = new CreateUserRequest
+        {
+            Name = "João",
+            Email = "joao@email.com",
+            Password = ""
+        };
+
+        var repositoryMock = new Mock<IUserRepository>();
+        var passwordHasherMock = new Mock<IPasswordHasher>();
+
+        var useCase = new CreateUserUseCase(
+            repositoryMock.Object,
+            passwordHasherMock.Object);
+
+        await Assert.ThrowsAsync<DomainException>(() => useCase.Execute(request));
+
+        passwordHasherMock.Verify(
+            hasher => hasher.HashPassword(It.IsAny<string>()),
+            Times.Never);
+
+        repositoryMock.Verify(
+            repository => repository.AddAsync(It.IsAny<User>()),
+            Times.Never);
+    }
 }

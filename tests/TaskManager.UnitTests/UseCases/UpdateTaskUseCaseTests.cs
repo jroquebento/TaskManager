@@ -15,11 +15,13 @@ public class UpdateTaskUseCaseTests
     {
         var taskItem = new TaskItem(_userId, "Tarefa original", null, null);
 
+        var dueDate = DateTime.UtcNow.AddDays(7);
+
         var request = new UpdateTaskRequest
         {
             Title = "Tarefa atualizada",
             Description = "Nova descrição",
-            DueDate = new DateTime(2026, 05, 01)
+            DueDate = dueDate
         };
 
         var repositoryMock = new Mock<ITaskRepository>();
@@ -42,7 +44,7 @@ public class UpdateTaskUseCaseTests
 
         Assert.Equal("Tarefa atualizada", result!.Title);
         Assert.Equal("Nova descrição", result.Description);
-        Assert.Equal(new DateTime(2026, 05, 01), result.DueDate);
+        Assert.Equal(dueDate, result.DueDate);
 
         repositoryMock.Verify(
             repository => repository.UpdateAsync(taskItem),

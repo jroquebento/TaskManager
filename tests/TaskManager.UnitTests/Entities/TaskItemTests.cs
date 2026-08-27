@@ -9,10 +9,10 @@ public class TaskItemTests
     private readonly Guid _userId = Guid.NewGuid();
 
     [Fact]
-    public void Start_ShouldChangeStatusToInProgress() 
+    public void Start_ShouldChangeStatusToInProgress()
     {
         // Arrange
-        var task = new TaskItem(_userId, "Tarefa de teste",null,null);
+        var task = new TaskItem(_userId, "Tarefa de teste", null, null);
 
 
         // Act
@@ -22,10 +22,10 @@ public class TaskItemTests
         Assert.Equal(TaskItemStatus.InProgress, task.Status);
     }
     [Fact]
-    
+
     public void Complete_ShouldChangeStatusToCompleted()
     {
-        var task = new TaskItem(_userId,"Tarefa de teste", null, null);
+        var task = new TaskItem(_userId, "Tarefa de teste", null, null);
         task.Start();
 
         task.Complete();
@@ -36,12 +36,12 @@ public class TaskItemTests
     public void Complete_ShouldThrowExceptionWhenTaskIsPending()
     {
         var task = new TaskItem(_userId, "Tarefa de teste", null, null);
-     
+
         Assert.Throws<DomainException>(() => task.Complete());
     }
 
     [Fact]
-    public void Start_ShouldThrowExceptionWhenTaskIsInProgress() 
+    public void Start_ShouldThrowExceptionWhenTaskIsInProgress()
     {
         var task = new TaskItem(_userId, "Tarefa de teste", null, null);
         task.Start();
@@ -50,7 +50,7 @@ public class TaskItemTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowExceptionWhenTitleIsNull() 
+    public void Constructor_ShouldThrowExceptionWhenTitleIsNull()
     {
         Assert.Throws<DomainException>(() => new TaskItem(_userId, null!, null, null));
     }
@@ -62,7 +62,7 @@ public class TaskItemTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowExceptionWhenTitleIsWhiteSpace() 
+    public void Constructor_ShouldThrowExceptionWhenTitleIsWhiteSpace()
     {
         Assert.Throws<DomainException>(() => new TaskItem(_userId, "   ", null, null));
     }
@@ -70,21 +70,56 @@ public class TaskItemTests
     [Fact]
     public void Update_ShouldChangeTaskData()
     {
-        TaskItem taskItem = new(_userId, "Tarefa original",null,null);
+        TaskItem taskItem = new(_userId, "Tarefa original", null, null);
 
-        taskItem.Update("Tarefa atualizada", "Nova descrição", new DateTime(2026,05,01));
+        var dueDate = DateTime.UtcNow.AddDays(7);
+
+        taskItem.Update("Tarefa atualizada", "Nova descrição", dueDate);
+
+        
 
         Assert.Equal("Tarefa atualizada", taskItem.Title);
         Assert.Equal("Nova descrição", taskItem.Description);
-        Assert.Equal(new DateTime(2026, 05, 01), taskItem.DueDate);
+        Assert.Equal(dueDate, taskItem.DueDate);
     }
 
     [Fact]
-    public void Update_ShouldThrowExceptionWhenTitleIsInvalid() 
+    public void Update_ShouldThrowExceptionWhenTitleIsInvalid()
     {
         TaskItem taskItem = new(_userId, "Tarefa original", null, null);
 
-        Assert.Throws<DomainException>(() => 
+        Assert.Throws<DomainException>(() =>
         taskItem.Update("", "Nova descrição", new DateTime(2026, 05, 01)));
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenDueDateIsBeforeCreatedAt()
+    {
+        var dueDate = DateTime.UtcNow.AddMinutes(-1);
+
+        Assert.Throws<DomainException>(() =>
+            new TaskItem(
+                _userId,
+                "Tarefa de teste",
+                null,
+                dueDate));
+    }
+
+    [Fact]
+    public void Update_ShouldThrowExceptionWhenDueDateIsBeforeCreatedAt()
+    {
+        var taskItem = new TaskItem(
+            _userId,
+            "Tarefa original",
+            null,
+            null);
+
+        var dueDate = taskItem.CreatedAt.AddMinutes(-1);
+
+        Assert.Throws<DomainException>(() =>
+            taskItem.Update(
+                "Tarefa atualizada",
+                "Nova descrição",
+                dueDate));
     }
 }

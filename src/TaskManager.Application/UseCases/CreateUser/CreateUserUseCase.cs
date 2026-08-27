@@ -23,6 +23,11 @@ public class CreateUserUseCase
             throw new DomainException("O e-mail informado já está cadastrado.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.Password)) 
+        {
+            throw new DomainException("A senha do usuário é obrigatória.");
+        }
+
         var passwordHash = _passwordHasher.HashPassword(request.Password);
 
         var user = new User(Guid.NewGuid(), request.Name, request.Email, passwordHash);

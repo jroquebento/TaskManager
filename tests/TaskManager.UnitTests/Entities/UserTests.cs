@@ -66,4 +66,26 @@ public class UserTests
                 "joao@email.com",
                 ""));
     }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenEmailIsInvalid()
+    {
+        Assert.Throws<DomainException>(() =>
+           new User(
+               Guid.NewGuid(),
+               "João",
+               "email-invalido",
+               "passwordHash"));
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowExceptionWhenEmailHasNoDotInDomain()
+    {
+        Assert.Throws<DomainException>(() =>
+            new User(
+                Guid.NewGuid(),
+                "João",
+                "teste@a",
+                "passwordHash"));
+    }
 }
