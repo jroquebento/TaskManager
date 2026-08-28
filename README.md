@@ -142,11 +142,13 @@ O projeto utiliza **SQL Server** com **Entity Framework Core** para persistênci
 
 O schema do banco é versionado por meio de **migrations do Entity Framework Core**.
 
-A migration inicial atualmente existente é:
+As migrations atualmente existentes no projeto são:
 
 ```text
 20260819123427_InitialCreate
+20260825151519_AddUser
 ```
+Elas representam a evolução do schema do banco de dados ao longo do desenvolvimento da aplicação.
 
 ### Banco de desenvolvimento com Docker
 
