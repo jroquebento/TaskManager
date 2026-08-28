@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - 'feature/**'
   pull_request:
     branches:
       - develop
@@ -11,6 +12,24 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    env:
+      TEST_CONNECTION_STRING: "Server=localhost,1433;Database=TaskManager_IntegrationTests;User Id=sa;Password=TaskManager@123;TrustServerCertificate=True;"
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2025-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: TaskManager@123
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'TaskManager@123' -C -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
 
     steps:
       - name: Checkout

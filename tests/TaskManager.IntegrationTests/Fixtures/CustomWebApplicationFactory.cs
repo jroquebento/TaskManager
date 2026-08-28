@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using TaskManager.IntegrationTests.TestControllers;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskManager.Infrastructure.Data;
+using TaskManager.IntegrationTests.TestControllers;
 
 namespace TaskManager.IntegrationTests.Fixtures;
 
@@ -25,10 +26,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
+            var connectionString = Environment.GetEnvironmentVariable("TEST_CONNECTION_STRING")
+                ?? @"Server=(localdb)\MSSQLLocalDB;Database=TaskManager_IntegrationTests;Trusted_Connection=True;TrustServerCertificate=True;";
+
             services.AddDbContext<TaskManagerDbContext>(options =>
             {
-                options.UseSqlServer(
-                    @"Server=(localdb)\MSSQLLocalDB;Database=TaskManager_IntegrationTests;Trusted_Connection=True;TrustServerCertificate=True;");
+                options.UseSqlServer(connectionString);
             });
 
             services
