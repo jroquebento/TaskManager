@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Filters;
 using TaskManager.Api.OpenApi;
@@ -42,6 +43,28 @@ builder.Services.AddScoped<ExceptionFilter>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ExceptionFilter>();
+})
+.ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors.Select(error => new
+            {
+                Field = x.Key,
+                Message = error.ErrorMessage
+            }))
+            .Where(error =>
+                !string.Equals(error.Field, "request", StringComparison.OrdinalIgnoreCase))
+            .Select(error =>
+                error.Field.Contains("dueDate", StringComparison.OrdinalIgnoreCase)
+                    ? "A data de vencimento informada é inválida."
+                    : error.Message)
+            .ToList();
+
+        return new BadRequestObjectResult(errors);
+    };
 });
 
 builder.Services.AddOpenApi(options =>
