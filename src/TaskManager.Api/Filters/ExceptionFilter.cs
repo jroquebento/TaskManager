@@ -10,9 +10,15 @@ public class ExceptionFilter : IExceptionFilter
     {
         var exception = context.Exception;
 
-        if (exception is DomainException) 
+        if (exception is DomainException)
         {
             context.Result = new BadRequestObjectResult(exception.Message);
+            return;
         }
+
+        context.Result = new ObjectResult("Ocorreu um erro interno no servidor.")
+        {
+            StatusCode = StatusCodes.Status500InternalServerError
+        };
     }
 }
