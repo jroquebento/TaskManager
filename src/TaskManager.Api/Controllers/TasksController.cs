@@ -68,7 +68,7 @@ public class TasksController : ControllerBase
         var taskItem = await _getTaskByIdUseCase.ExecuteAsync(id);
         if (taskItem == null)
         {
-            return NotFound();
+            return NotFound("Tarefa não encontrada.");
         }
 
         var response = TaskMapper.ToResponse(taskItem);
@@ -85,7 +85,7 @@ public class TasksController : ControllerBase
         
         if (taskItem == null)
         {
-            return NotFound();
+            return NotFound("Tarefa não encontrada.");
         }
 
         var response = TaskMapper.ToResponse(taskItem);
@@ -101,7 +101,7 @@ public class TasksController : ControllerBase
         var deleted = await _deleteTaskUseCase.ExecuteAsync(id);
         if (!deleted) 
         {
-            return NotFound();
+            return NotFound("Tarefa não encontrada.");
         }
 
         return NoContent();
@@ -117,7 +117,7 @@ public class TasksController : ControllerBase
 
         if (!started) 
         {
-            return NotFound();
+            return NotFound("Tarefa não encontrada.");
         }
 
         return Ok();
@@ -133,7 +133,7 @@ public class TasksController : ControllerBase
 
         if (!completed) 
         {
-            return NotFound();
+            return NotFound("Tarefa não encontrada.");
         }
 
         return Ok();
