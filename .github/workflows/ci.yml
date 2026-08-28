@@ -61,4 +61,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
  
       - name: Build Docker image
-        run: docker build -t taskmanager-api .
+        run: docker build -t ghcr.io/jroquebento/taskmanager:latest .
+
+      - name: Push Docker image
+        run: docker push ghcr.io/jroquebento/taskmanager:latest
