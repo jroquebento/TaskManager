@@ -4,11 +4,11 @@
 
 O **TaskManager** é uma API REST para gerenciamento de tarefas, desenvolvida com **C# e .NET**.
 
-O projeto está sendo desenvolvido com foco em aprendizado prático e construção de portfólio, aplicando conceitos e práticas comuns no desenvolvimento de aplicações backend.
+O projeto foi desenvolvido com foco em aprendizado prático e construção de portfólio, aplicando conceitos e práticas comuns no desenvolvimento de aplicações backend.
 
 ## Objetivo
 
-O objetivo do projeto é desenvolver uma aplicação completa de gerenciamento de tarefas, passando de forma incremental pelas principais etapas do desenvolvimento de uma API:
+O objetivo do projeto é desenvolver uma aplicação completa de gerenciamento de tarefas, passando pelas principais etapas do desenvolvimento de uma API:
 
 * Modelagem do domínio
 * Desenvolvimento de uma API REST
@@ -19,10 +19,10 @@ O objetivo do projeto é desenvolver uma aplicação completa de gerenciamento d
 * Documentação da API
 * Controle de versão
 * Containerização
-* Integração e entrega contínuas (CI/CD)
 * Autenticação e autorização
+* Integração e entrega contínuas (CI/CD)
 
-Os recursos são implementados gradualmente, permitindo aplicar os conceitos estudados ao longo do desenvolvimento.
+Os recursos foram implementados de forma incremental, permitindo aplicar os conceitos estudados ao longo do desenvolvimento.
 
 ## Funcionalidades
 
@@ -38,9 +38,9 @@ Os recursos são implementados gradualmente, permitindo aplicar os conceitos est
 
 ### Usuários
 
-* [ ] Cadastro de usuário
-* [ ] Autenticação
-* [ ] Autorização
+* [x] Cadastro de usuário
+* [x] Autenticação
+* [x] Autorização
 
 ### Qualidade e infraestrutura
 
@@ -50,7 +50,7 @@ Os recursos são implementados gradualmente, permitindo aplicar os conceitos est
 * [x] Testes de integração
 * [x] Documentação com Swagger/OpenAPI
 * [x] Entity Framework Core Migrations
-* [ ] Docker
+* [x] Docker
 * [ ] CI/CD
 
 ## Regras de negócio
@@ -62,6 +62,7 @@ As regras atualmente implementadas incluem:
 * Uma tarefa inicia no status `Pending`.
 * Uma tarefa só pode ser iniciada quando estiver em `Pending`.
 * Uma tarefa só pode ser concluída quando estiver em `InProgress`.
+* Cada usuário pode acessar apenas suas próprias tarefas.
 * O ciclo de vida da tarefa segue as transições:
 
 ```text
@@ -70,18 +71,20 @@ Pending → InProgress → Completed
 
 * Transições de estado inválidas são rejeitadas pela aplicação.
 
-Novas regras poderão ser adicionadas conforme o projeto evoluir.
-
 ## Tecnologias
 
 As principais tecnologias e ferramentas utilizadas no projeto são:
 
 * **C#**
-* **.NET**
+* **.NET 10**
 * **ASP.NET Core**
 * **Entity Framework Core**
 * **SQL Server**
+* **Docker**
+* **Docker Compose**
 * **Swagger/OpenAPI**
+* **JWT**
+* **Argon2**
 * **xUnit**
 * **Moq**
 * **Git**
@@ -111,11 +114,11 @@ TaskManager
 
 **TaskManager.Api**
 
-Responsável pela exposição da API REST, recebimento das requisições HTTP e retorno das respostas.
+Responsável pela exposição da API REST, recebimento das requisições HTTP, autenticação e retorno das respostas.
 
 **TaskManager.Application**
 
-Responsável pelos casos de uso, DTOs, mapeamentos e coordenação das operações da aplicação.
+Responsável pelos casos de uso, DTOs, interfaces e coordenação das operações da aplicação.
 
 **TaskManager.Domain**
 
@@ -123,7 +126,7 @@ Contém as entidades, enums, exceções e regras relacionadas ao domínio do sis
 
 **TaskManager.Infrastructure**
 
-Responsável pelas implementações relacionadas à infraestrutura, incluindo persistência, Entity Framework Core, DbContext e acesso ao banco de dados.
+Responsável pelas implementações relacionadas à infraestrutura, incluindo persistência, Entity Framework Core, DbContext, repositórios e recursos de segurança.
 
 **TaskManager.UnitTests**
 
@@ -145,74 +148,99 @@ A migration inicial atualmente existente é:
 20260819123427_InitialCreate
 ```
 
-### Configuração da conexão
+### Banco de desenvolvimento com Docker
 
-A aplicação utiliza a connection string configurada em:
+A aplicação utiliza **Docker Compose** para executar a API juntamente com uma instância do SQL Server.
+
+A configuração está definida no arquivo:
 
 ```text
-src/TaskManager.Api/appsettings.json
+docker-compose.yml
 ```
 
-A connection string deve apontar para uma instância do SQL Server disponível no ambiente de execução.
+O Compose cria dois serviços:
 
-### Aplicando as migrations
+* **api** — aplicação ASP.NET Core.
+* **sqlserver** — banco de dados SQL Server.
 
-Com o SQL Server configurado, execute na raiz da solução:
+A API se conecta ao SQL Server através do nome do serviço `sqlserver` dentro da rede do Docker.
 
-```bash
-dotnet ef database update --project src/TaskManager.Infrastructure --startup-project src/TaskManager.Api
-```
-
-Esse comando cria ou atualiza o banco de dados de acordo com as migrations existentes.
+As migrations são aplicadas automaticamente pela aplicação durante a inicialização.
 
 ## Como executar o projeto
 
 ### Pré-requisitos
 
-* .NET SDK 10
-* SQL Server ou SQL Server LocalDB
-* Git
-* `dotnet-ef`
+Para executar o projeto utilizando Docker, é necessário ter instalado:
 
-Caso a ferramenta `dotnet-ef` ainda não esteja instalada:
+* Docker
+* Docker Compose
+
+Não é necessário instalar o .NET SDK ou SQL Server separadamente para executar a aplicação através do Docker.
+
+### Executar com Docker Compose
+
+Na raiz do projeto, execute:
+
+```bash
+docker compose up --build
+```
+
+O Docker Compose irá:
+
+1. Criar o container do SQL Server.
+2. Aguardar o SQL Server ficar disponível.
+3. Construir a imagem da API.
+4. Iniciar a API.
+5. Aplicar as migrations do Entity Framework Core automaticamente.
+
+A API ficará disponível em:
+
+```text
+http://localhost:8080
+```
+
+A documentação da API pode ser acessada em:
+
+```text
+http://localhost:8080/swagger
+```
+
+### Parar a aplicação
+
+Para parar os containers:
+
+```bash
+docker compose down
+```
+
+Os dados do SQL Server são armazenados no volume Docker `sqlserver_data` e permanecem disponíveis após a remoção dos containers.
+
+Para remover também o volume e apagar os dados do banco:
+
+```bash
+docker compose down -v
+```
+
+## Migrations
+
+As migrations são gerenciadas pelo **Entity Framework Core**.
+
+Ao executar a aplicação através do Docker Compose, as migrations existentes são aplicadas automaticamente durante a inicialização da API.
+
+Para criar novas migrations durante o desenvolvimento, é necessário ter o .NET SDK e a ferramenta `dotnet-ef` instalados.
+
+Caso a ferramenta ainda não esteja instalada:
 
 ```bash
 dotnet tool install --global dotnet-ef
 ```
 
-### Restaurar dependências
-
-Na raiz da solução:
+Exemplo para criar uma nova migration:
 
 ```bash
-dotnet restore
+dotnet ef migrations add NomeDaMigration --project src/TaskManager.Infrastructure --startup-project src/TaskManager.Api
 ```
-
-### Aplicar as migrations
-
-```bash
-dotnet ef database update --project src/TaskManager.Infrastructure --startup-project src/TaskManager.Api
-```
-
-### Executar a API
-
-Para executar utilizando o perfil HTTPS configurado no projeto:
-
-```bash
-dotnet run --launch-profile https --project src/TaskManager.Api
-```
-
-Após iniciar a aplicação, a URL HTTPS será exibida no terminal.
-
-A documentação da API pode ser acessada adicionando `/swagger` à URL exibida.
-
-Exemplo:
-
-```text
-https://localhost:7149/swagger
-```
-
-A porta pode variar conforme a configuração do ambiente.
 
 ## Testes
 
@@ -226,16 +254,37 @@ dotnet test
 
 Os testes de integração utilizam um banco SQL Server separado do banco de desenvolvimento para evitar que os dados dos testes interfiram no ambiente local.
 
+## Autenticação
+
+A API utiliza **JWT (JSON Web Token)** para autenticação.
+
+Para acessar os endpoints protegidos:
+
+1. Cadastre um usuário através da API.
+2. Realize o login.
+3. Utilize o token JWT retornado na autenticação.
+4. Envie o token no header `Authorization`:
+
+```text
+Authorization: Bearer <token>
+```
+
+A autenticação pode ser testada através do Swagger disponível em:
+
+```text
+http://localhost:8080/swagger
+```
+
 ## Status do projeto
 
-🚧 **Em desenvolvimento**
+🚧 **Concluído para fins de portfólio**
 
-O projeto está sendo construído incrementalmente, desde a estrutura inicial até a implementação de funcionalidades e recursos de infraestrutura.
+A implementação principal da API foi concluída, incluindo gerenciamento de tarefas, cadastro e autenticação de usuários, autorização, persistência de dados, testes automatizados, tratamento de exceções e execução com Docker.
 
-As funcionalidades ainda planejadas incluem autenticação, autorização, Docker e CI/CD.
+**CI/CD** permanece como uma possível evolução futura.
 
 ## Objetivo de aprendizado
 
 Este projeto faz parte do processo de desenvolvimento de habilidades em **.NET e desenvolvimento backend**, buscando transformar conhecimentos teóricos em experiência prática por meio da construção de uma aplicação completa.
 
-O objetivo não é apenas desenvolver uma API funcional, mas compreender as decisões de arquitetura, organização de código, persistência, testes, versionamento, documentação e práticas utilizadas no desenvolvimento de software.
+O objetivo não é apenas desenvolver uma API funcional, mas compreender as decisões de arquitetura, organização de código, persistência, autenticação, testes, versionamento, documentação e práticas utilizadas no desenvolvimento de software.
