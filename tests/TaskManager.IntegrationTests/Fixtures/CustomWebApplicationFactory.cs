@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using TaskManager.IntegrationTests.TestControllers;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseSqlServer(
                     @"Server=(localdb)\MSSQLLocalDB;Database=TaskManager_IntegrationTests;Trusted_Connection=True;TrustServerCertificate=True;");
             });
+
+            services
+                .AddControllers()
+                .AddApplicationPart(typeof(ExceptionTestController).Assembly);
+
             var serviceProvider = services.BuildServiceProvider();
 
             using var scope = serviceProvider.CreateScope();
