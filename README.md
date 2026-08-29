@@ -186,12 +186,13 @@ cd TaskManager
 Em seguida, execute:
 
 ```bash
+docker compose pull
 docker compose up
 ```
 
 O Docker Compose irá:
 
-1. Baixar a imagem da API publicada no GitHub Container Registry.
+1. Baixar a versão mais recente da imagem da API publicada no GitHub Container Registry.
 2. Criar o container do SQL Server.
 3. Aguardar o SQL Server ficar disponível.
 4. Iniciar a API.
