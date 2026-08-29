@@ -16,6 +16,7 @@ public class TaskItem
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
+    private TaskItem() { }
 
     public TaskItem(Guid userId, string title, string? description, DateTime? dueDate)
     {
